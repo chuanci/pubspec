@@ -58,7 +58,7 @@ class YamlToString {
     String preType,
   }) {
     if (!isTopLevel) {
-      if (preType == "list") {
+      if (preType != "list") {
         stringSink.writeln();
       }
       indentCount += 2;
@@ -69,15 +69,15 @@ class YamlToString {
 
     keys.forEach((key) {
       final value = node[key];
-      if (preType == "list") {
+      if (preType != "list") {
+        _writeIndent(indentCount, stringSink);
+      } else {
         if (b) {
           _writeIndent(indentCount, stringSink);
         } else {
           _writeIndent(0, stringSink);
           b = true;
         }
-      } else {
-        _writeIndent(indentCount, stringSink);
       }
 
       stringSink..write(key)..write(_divider);
