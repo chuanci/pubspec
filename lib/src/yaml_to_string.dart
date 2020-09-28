@@ -1,5 +1,4 @@
-final _unsuportedCharacters = RegExp(
-    r'''^[\n\t ,[\]{}#&*!|<>'"%@']|^[?-]$|^[?-][ \t]|[\n:][ \t]|[ \t]\n|[\n\t ]#|[\n\t :]$''');
+final _unsuportedCharacters = RegExp(r'''^[\n\t ,[\]{}#&*!|<>'"%@']|^[?-]$|^[?-][ \t]|[\n:][ \t]|[ \t]\n|[\n\t ]#|[\n\t :]$''');
 
 class YamlToString {
   const YamlToString({
@@ -25,8 +24,9 @@ class YamlToString {
     node,
     int indentCount,
     StringSink stringSink,
-    bool isTopLevel,
-  ) {
+    bool isTopLevel, {
+    String preType,
+  }) {
     if (node is Map) {
       _mapToYamlString(node, indentCount, stringSink, isTopLevel);
     } else if (node is Iterable) {
@@ -54,28 +54,39 @@ class YamlToString {
     node,
     int indentCount,
     StringSink stringSink,
-    bool isTopLevel,
-  ) {
+    bool isTopLevel, {
+    String preType,
+  }) {
     if (!isTopLevel) {
-      stringSink.writeln();
+      if (preType == "list") {
+        stringSink.writeln();
+      }
       indentCount += 2;
     }
 
     final keys = _sortKeys(node);
+    bool b = false;
 
     keys.forEach((key) {
       final value = node[key];
-      _writeIndent(indentCount, stringSink);
+      if (preType == "list") {
+        if (b) {
+          _writeIndent(indentCount, stringSink);
+        } else {
+          _writeIndent(0, stringSink);
+          b = true;
+        }
+      } else {
+        _writeIndent(indentCount, stringSink);
+      }
+
       stringSink..write(key)..write(_divider);
-      _writeYamlString(value, indentCount, stringSink, false);
+      _writeYamlString(value, indentCount, stringSink, false, preType: "map");
     });
   }
 
   Iterable<String> _sortKeys(Map map) {
-    final simple = <String>[],
-        maps = <String>[],
-        lists = <String>[],
-        other = <String>[];
+    final simple = <String>[], maps = <String>[], lists = <String>[], other = <String>[];
 
     map.forEach((key, value) {
       if (value is String) {
@@ -96,8 +107,9 @@ class YamlToString {
     Iterable node,
     int indentCount,
     StringSink stringSink,
-    bool isTopLevel,
-  ) {
+    bool isTopLevel, {
+    String preType,
+  }) {
     if (!isTopLevel) {
       stringSink.writeln();
       indentCount += 2;
@@ -106,10 +118,9 @@ class YamlToString {
     node.forEach((value) {
       _writeIndent(indentCount, stringSink);
       stringSink.write('- ');
-      _writeYamlString(value, indentCount, stringSink, false);
+      _writeYamlString(value, indentCount, stringSink, false, preType: "list");
     });
   }
 
-  void _writeIndent(int indentCount, StringSink stringSink) =>
-      stringSink.write(indent * indentCount);
+  void _writeIndent(int indentCount, StringSink stringSink) => stringSink.write(indent * indentCount);
 }
