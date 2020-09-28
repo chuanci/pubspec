@@ -28,9 +28,9 @@ class YamlToString {
     String preType,
   }) {
     if (node is Map) {
-      _mapToYamlString(node, indentCount, stringSink, isTopLevel);
+      _mapToYamlString(node, indentCount, stringSink, isTopLevel, preType: preType);
     } else if (node is Iterable) {
-      _listToYamlString(node, indentCount, stringSink, isTopLevel);
+      _listToYamlString(node, indentCount, stringSink, isTopLevel, preType: preType);
     } else if (node is String) {
       stringSink.writeln(_escapeString(node));
     } else if (node is double) {
